@@ -14,17 +14,30 @@ function OpenTodoList(filename)
 
     " This actually loads things, so that vim can track it...
     exe 'vnew '.l:backing_file 
-    enew
+    let l:todobuff = 'todo://'.l:backing_file
+    exe 'edit '.l:todobuff
     let b:backing_todo_file = l:backing_file
-    "TODO: Look at fugitive
-    nnoremap <buffer><silent> dd  :call MarkComplete()<CR>
 
-    let &l:statusline='[Todo List]'
-    "TODO delete vs hidden
+    " We don't want to unload because we want b:backing_todo_file
+    
     "TODO nofile vs nowrite
-    setl buftype=nofile bufhidden=delete noswapfile
+    setl buftype=nofile bufhidden=hide noswapfile
     setl noma
+    setl filetype=todofile
     call BufferRefreshTodos()
+
+
+"TODO: Autocmd that automatically does refreshing
+    augroup codetodo
+        autocmd!
+        autocmd BufEnter todo://* silent call BufferRefreshTodos()
+    augroup END
+    
+    nnoremap <buffer><silent> dd  :call MarkComplete()<CR>
+    nnoremap <buffer><silent> r  :call BufferRefreshTodos()<CR>
+    nnoremap <buffer><silent> n  :call OpenBackingFile()<CR>
+    nnoremap <buffer><silent> u  :call UndoChange()<CR>
+
 endfunction
 
 
@@ -56,6 +69,19 @@ function BufferRefreshTodos()
     setl noma
     call setpos('.',l:curpos)
     echo "Refresh complete!"
+endfunction
+
+"This is pretty experimental still
+"Right now, we are doing a lot of nonsense
+function UndoChange()
+    if !s:CheckValidity()
+       return
+   endif
+   let l:me = bufname()
+   exe 'edit '.b:backing_todo_file
+   undo
+   write
+   exe 'edit '.l:me
 endfunction
 
 function TodoCommand(raw_argstr)
@@ -96,5 +122,7 @@ function MarkComplete()
     endif
     silent call TodoCommand('done ' . s:ExtractTaskNumber())
 endfunction
+
+
 
 call OpenTodoList('example.todo')
