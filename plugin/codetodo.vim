@@ -86,7 +86,7 @@ function OpenBackingFile()
     endif
     let l:curr = s:ExtractTaskNumber()
     exe 'vnew '.b:backing_todo_file
-    exe l:curr
+    exe l:curr+1
 
 endfunction
 
