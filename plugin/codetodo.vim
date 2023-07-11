@@ -27,7 +27,7 @@ endfunction
 function s:CreateViewAutocmds() abort
     augroup codetodo
         autocmd!
-        autocmd BufEnter <buffer> silent call <SID>BufferRefreshTodos()
+        autocmd BufEnter <buffer> call <SID>BufferRefreshTodos()
     augroup END
 endfunction
 
@@ -53,7 +53,9 @@ function OpenTodoView() abort
 
         "TODO nofile vs nowrite
         "We wanted to list the buffer, so no nobuflisted
-        setl buftype=nofile bufhidden=hide noswapfile
+        setl buftype=nofile 
+        setl bufhidden=hide 
+        setl noswapfile
         setl noma
 
         call s:CreateViewMaps()
@@ -89,7 +91,7 @@ function s:BufferRefreshTodos() abort
 
     " Clean backing file
     %delete
-    exe '0read '.b:backing_todo_file
+    silent exe '0read '.b:backing_todo_file
     $delete
 
     " Make subtasks cleaner
@@ -119,7 +121,7 @@ function s:BackingFileCommand(...) abort
         exe cmd_string
     endfor
 
-    write
+    silent write
     exe 'edit '.l:me
     call setpos('.',l:curpos)
 endfunction
