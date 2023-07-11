@@ -66,7 +66,7 @@ endfunction
 
 nnoremap <unique> <Plug>(code-todo-viewopen) <Cmd>call OpenTodoView()<CR>
 if get(g:, 'codetodo_mapenable', 1)
-    nmap <silent><unique> <space>v <Plug>(code-todo-viewopen)
+    nmap <silent> <space>v <Plug>(code-todo-viewopen)
 endif
 
 " I am sure we can make things better...
