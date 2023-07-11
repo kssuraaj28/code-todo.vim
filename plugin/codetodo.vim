@@ -1,50 +1,72 @@
-"TODO: If loaded code_todo, load code_todo...
-"TODO: Read the plugin tutorial
+if exists('g:loaded_codetodo_vim')
+  finish
+endif
+let g:loaded_codetodo_vim = 1
 
 
 let s:script_path = resolve(expand('<sfile>:p'))
 let s:script_dir = fnamemodify(s:script_path, ':h')
 let s:todo_binary = s:script_dir.'/../code-todo.py'
 
+
 function s:CreateViewMaps() abort
-    nnoremap <buffer><silent> dd  :call MarkComplete()<CR>
-    nnoremap <buffer><silent> n  :call OpenBackingFile()<CR>
-    nnoremap <buffer><silent> u  :call UndoChange()<CR>
-    nnoremap <buffer> o  V:<BS><BS><BS><BS><BS>call AddTask('')<Left><Left>
-    nnoremap <buffer><silent> <  :call MakeShallower()<CR>
-    nnoremap <buffer><silent> >  :call MakeDeeper()<CR>
+    nnoremap <buffer> dd  <Cmd>call <SID>MarkComplete()<CR>
+    nnoremap <buffer> u  <Cmd>call <SID>UndoChange()<CR>
+
+    nnoremap <buffer> <  <Cmd>call <SID>MakeShallower()<CR>
+    nnoremap <buffer> >  <Cmd>call <SID>MakeDeeper()<CR>
+
+    nnoremap <buffer> <space>v  :call <SID>OpenBackingFile()<CR>
+
+    "TODO: Make this much better
+    nnoremap <buffer> o  V:<BS><BS><BS><BS><BS>call <SID>AddTask('')<Left><Left>
+    nnoremap <buffer> cc  <Cmd>call <SID>EditTask('')<Left><Left>
 endfunction
 
+function s:CreateViewAutocmds() abort
+    augroup codetodo
+        autocmd!
+        autocmd BufEnter <buffer> silent call <SID>BufferRefreshTodos()
+    augroup END
+endfunction
+
+
 " This is like a constructor
-function OpenTodoList() abort
+function OpenTodoView() abort
     let l:backing_file = resolve(expand('%:p'))
+
     if l:backing_file ==# ''
         echoerr "No file found"
         return
     endif
+
+    " TODO: Check if current file is a todo file
     " TODO: Todofiletype
-    " This actually loads things, so that vim can track it...
-    exe 'vnew '.l:backing_file 
+    
     let l:todobuff = 'todo://'.l:backing_file
+    let l:backing_line = getpos('.')[1]
     exe 'edit '.l:todobuff
-    if exists('b:backing_todo_file')
-        return
+
+    if !exists('b:backing_todo_file')
+        let b:backing_todo_file = l:backing_file
+
+        "TODO nofile vs nowrite
+        "We wanted to list the buffer, so no nobuflisted
+        setl buftype=nofile bufhidden=hide noswapfile
+        setl noma
+
+        call s:CreateViewMaps()
+        call s:CreateViewAutocmds()
+        call s:BufferRefreshTodos()
     endif
 
-    let b:backing_todo_file = l:backing_file
-
-    "TODO nofile vs nowrite
-    setl buftype=nofile bufhidden=hide noswapfile
-    setl noma
-
-    call BufferRefreshTodos()
-    augroup codetodo
-        autocmd!
-        autocmd BufEnter todo://* silent call BufferRefreshTodos()
-    augroup END
-    call s:CreateViewMaps()
+    call search('^'.l:backing_line,'cw')
 endfunction
 
+nnoremap <unique> <Plug>(code-todo-viewopen) <Cmd>call OpenTodoView()<CR>
+if get(g:, 'codetodo_mapenable', 1)
+    nmap <silent><unique> <space>v <Plug>(code-todo-viewopen)
+endif
 
 " I am sure we can make things better...
 function s:CheckValidity() abort
@@ -56,7 +78,7 @@ function s:CheckValidity() abort
 endfunction
 
 
-function BufferRefreshTodos() abort
+function s:BufferRefreshTodos() abort
     if !s:CheckValidity()
         return
     endif
@@ -70,7 +92,7 @@ function BufferRefreshTodos() abort
     $delete
 
     " Make subtasks cleaner
-    silent %s/^-*/\=repeat('    ',strlen(submatch(0)))
+    silent %s/^-*/\=repeat('    ',strlen(submatch(0))).'* '
 
     " Add line numbers to the file
     silent %s/^/\=line('.')."\t"/
@@ -80,11 +102,9 @@ function BufferRefreshTodos() abort
     setl noma
 
     call setpos('.',l:curpos)
-    echo "Refresh complete!"
 endfunction
 
-
-function BackingFileCommand(...) abort
+function s:BackingFileCommand(...) abort
     if !s:CheckValidity()
        return
     endif
@@ -103,13 +123,26 @@ function BackingFileCommand(...) abort
     call setpos('.',l:curpos)
 endfunction
 
-function UndoChange()
-    call BackingFileCommand('undo')
+function s:UndoChange()
+    call s:BackingFileCommand('undo')
 endfunction
 
 
-function AddTask(taskstring)
-    call BackingFileCommand(
+function s:EditTask(taskstring)
+    call s:BackingFileCommand(
+                \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
+                \ 'normal! 0wD"="'.taskstring.'"<CR>p'
+                \)
+endfunction
+
+function s:MarkComplete()
+    call s:BackingFileCommand(
+                \ 'normal! A ~'
+                \)
+endfunction
+
+function s:AddTask(taskstring)
+    call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
                 \ 'let l:taskadded = l:hyphens."'.a:taskstring.'"',
                 \ 'put =l:taskadded'
@@ -117,23 +150,17 @@ function AddTask(taskstring)
     normal! j
 endfunction
 
-function MakeDeeper()
-    call BackingFileCommand(
+function s:MakeDeeper()
+    call s:BackingFileCommand(
                 \ 'normal! 0i-',
                 \)
 endfunction
 
 
 "TODO: Can we add some if condition here
-function MakeShallower()
-    call BackingFileCommand(
+function s:MakeShallower()
+    call s:BackingFileCommand(
                 \ 'silent s/^-//'
-                \)
-endfunction
-
-function MarkComplete()
-    call BackingFileCommand(
-                \ 'normal! A ~'
                 \)
 endfunction
 
@@ -153,13 +180,12 @@ function s:ExtractTaskNumber()
     return l:taskno
 endfunction
 
-" If something bad happens
-function OpenBackingFile()
+function s:OpenBackingFile()
     if !s:CheckValidity()
        return
     endif
     let l:curr = s:ExtractTaskNumber()
-    exe 'vnew '.b:backing_todo_file
-    exe l:curr+1
+    exe 'edit '.b:backing_todo_file
+    exe l:curr
 endfunction
 
