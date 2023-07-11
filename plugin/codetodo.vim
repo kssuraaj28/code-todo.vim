@@ -16,8 +16,9 @@ function s:CreateViewMaps() abort
     nnoremap <buffer> <  <Cmd>call <SID>MakeShallower()<CR>
     nnoremap <buffer> >  <Cmd>call <SID>MakeDeeper()<CR>
 
-    nnoremap <buffer> <space>v  :call <SID>OpenBackingFile()<CR>
-
+    "Use user's same mapping to switch back to BackingFile
+    nnoremap <buffer> <Plug>(code-todo-viewopen) :call <SID>OpenBackingFile()<CR>
+    
     "TODO: Make this much better
     nnoremap <buffer> o  V:<BS><BS><BS><BS><BS>call <SID>AddTask('')<Left><Left>
     nnoremap <buffer> cc  <Cmd>call <SID>EditTask('')<Left><Left>
