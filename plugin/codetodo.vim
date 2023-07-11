@@ -57,6 +57,7 @@ function OpenTodoView() abort
         setl bufhidden=hide 
         setl noswapfile
         setl noma
+        setl syntax=todoview
 
         call s:CreateViewMaps()
         call s:CreateViewAutocmds()
