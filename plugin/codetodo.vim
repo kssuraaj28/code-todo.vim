@@ -116,25 +116,25 @@ function s:BackingFileCommand(...) abort
     call setpos('.',l:curpos)
 endfunction
 
-function s:UndoChange()
+function s:UndoChange() abort
     call s:BackingFileCommand('undo')
 endfunction
 
 
-function s:EditTask(taskstring)
+function s:EditTask(taskstring) abort
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
                 \ 'normal! 0wD"="'.taskstring.'"<CR>p'
                 \)
 endfunction
 
-function s:MarkComplete()
+function s:MarkComplete() abort
     call s:BackingFileCommand(
                 \ 'normal! A ~'
                 \)
 endfunction
 
-function s:AddTask(taskstring)
+function s:AddTask(taskstring) abort
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
                 \ 'let l:taskadded = l:hyphens."'.a:taskstring.'"',
@@ -143,7 +143,7 @@ function s:AddTask(taskstring)
     normal! j
 endfunction
 
-function s:MakeDeeper()
+function s:MakeDeeper() abort
     call s:BackingFileCommand(
                 \ 'normal! 0i-',
                 \)
@@ -151,18 +151,18 @@ endfunction
 
 
 "TODO: Can we add some if condition here
-function s:MakeShallower()
+function s:MakeShallower() abort
     call s:BackingFileCommand(
                 \ 'silent s/^-//'
                 \)
 endfunction
 
-function s:ExtractTaskDepthBacking()
+function s:ExtractTaskDepthBacking() abort
     let l:line = getline(".")
     return len(matchstr(l:line,"^\-*"))
 endfunction
 
-function s:ExtractTaskNumber()
+function s:ExtractTaskNumber() abort
     if !s:CheckValidity()
        return
     endif
@@ -173,7 +173,7 @@ function s:ExtractTaskNumber()
     return l:taskno
 endfunction
 
-function s:OpenBackingFile()
+function s:OpenBackingFile() abort
     if !s:CheckValidity()
        return
     endif
