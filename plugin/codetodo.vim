@@ -87,7 +87,13 @@ function s:BufferRefreshTodos() abort
         return
     endif
 
-    let l:curpos = getpos('.')
+    let l:window_collection = win_findbuf(bufnr())
+    let l:winviews = {}
+    for l:win_id in win_findbuf(bufnr())
+        call win_execute(win_id,
+                    \'let l:winviews[l:win_id] = winsaveview()')
+    endfor
+
     setl ma
 
     " Clean backing file
@@ -105,7 +111,10 @@ function s:BufferRefreshTodos() abort
     silent global/^.*\~$/d
     setl noma
 
-    call setpos('.',l:curpos)
+    for l:win_id in l:window_collection
+        call win_execute(win_id, 
+                    \'call winrestview(l:winviews[l:win_id])')
+    endfor
 endfunction
 
 function s:BackingFileCommand(...) abort
