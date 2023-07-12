@@ -21,7 +21,7 @@ function s:CreateViewMaps() abort
     
     "TODO: Make this much better
     nnoremap <buffer> o  V:<BS><BS><BS><BS><BS>call <SID>AddTask('')<Left><Left>
-    nnoremap <buffer> cc  <Cmd>call <SID>EditTask('')<Left><Left>
+    nnoremap <buffer> cc :call <SID>EditTask('')<Left><Left>
 endfunction
 
 function s:CreateViewAutocmds() abort
@@ -190,13 +190,18 @@ function OpenTodoView() abort
         echoerr "No file found"
         return
     endif
-    "TODO: Check buftype
-    "TODO: Check readonly
 
-    " TODO: Check if current file is a todo file
-    " TODO: Todofiletype
+    if ! &l:buftype ==# ''
+        echoerr "Must be a simple file"
+        return
+    endif
+
+    if &l:readonly
+        echoerr "Must not be readonly"
+        return
+    endif
+
     " TODO: Extract this to a function
- 
     let l:todobuff = 'todo://'.l:backing_file
     let l:backing_line = getpos('.')[1]
 
