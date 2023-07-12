@@ -102,7 +102,7 @@ function s:BackingFileCommand(...) abort
        return
     endif
     let l:task_no = s:ExtractTaskNumber()
-    let l:curpos = getpos('.')
+    let l:curview = winsaveview()
     let l:me = bufname()
     exe 'edit '.b:backing_todo_file
     exe l:task_no
@@ -113,7 +113,7 @@ function s:BackingFileCommand(...) abort
 
     silent write
     exe 'edit '.l:me
-    call setpos('.',l:curpos)
+    call winrestview(l:curview)
 endfunction
 
 function s:UndoChange() abort
@@ -166,10 +166,10 @@ function s:ExtractTaskNumber() abort
     if !s:CheckValidity()
        return
     endif
-    let l:curpos = getpos('.')
+    let l:curview = winsaveview()
     normal 0
     let l:taskno = expand('<cword>')
-    call setpos('.',l:curpos)
+    call winrestview(l:curview)
     return l:taskno
 endfunction
 
