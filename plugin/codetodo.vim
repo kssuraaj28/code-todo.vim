@@ -191,6 +191,16 @@ function OpenTodoView() abort
         return
     endif
 
+    if !filereadable(l:backing_file)
+        echoerr "File not readable"
+        return
+    endif
+
+    if !filewritable(l:backing_file)
+        echoerr "File not writeable"
+        return
+    endif
+
     if ! &l:buftype ==# ''
         echoerr "Must be a simple file"
         return
