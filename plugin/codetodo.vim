@@ -205,7 +205,7 @@ function OpenTodoView() abort
     let l:todobuff = 'todo://'.l:backing_file
     let l:backing_line = getpos('.')[1]
 
-    exe 'edit '.l:todobuff
+    exe 'silent edit '.l:todobuff
 
     if !exists('b:backing_todo_file')
         let b:backing_todo_file = l:backing_file
