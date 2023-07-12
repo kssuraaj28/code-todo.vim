@@ -27,50 +27,28 @@ endfunction
 function s:CreateViewAutocmds() abort
     augroup codetodo
         autocmd!
-        autocmd BufEnter <buffer> call <SID>BufferRefreshTodos()
+        autocmd BufEnter <buffer> call <SID>ViewRefreshFromBackingFile()
     augroup END
 endfunction
 
-
-" This is like a constructor
-function OpenTodoView() abort
-    let l:backing_file = resolve(expand('%:p'))
-
-    if l:backing_file ==# ''
-        echoerr "No file found"
+"TODO: Make sure that you write 
+function s:EnsureBackingFilePersist() abort
+    if !s:CheckValidity()
         return
     endif
 
-    " TODO: Check if current file is a todo file
-    " TODO: Todofiletype
-    
-    let l:todobuff = 'todo://'.l:backing_file
-    let l:backing_line = getpos('.')[1]
-    exe 'edit '.l:todobuff
+    let l:backing_buf = bufname(b:backing_todo_file)
+    if getbufvar(l:backing_buf, "&modified")
+        echohl WarningMsg 
+            echom "Warning: Backing file is not persistent. Saving changes"
+        echohl None
 
-    if !exists('b:backing_todo_file')
-        let b:backing_todo_file = l:backing_file
-
-        "TODO nofile vs nowrite
-        "We wanted to list the buffer, so no nobuflisted
-        setl buftype=nofile 
-        setl bufhidden=hide 
-        setl noswapfile
-        setl noma
-        setl syntax=todoview
-
-        call s:CreateViewMaps()
-        call s:CreateViewAutocmds()
-        call s:BufferRefreshTodos()
+        "From https://github.com/vim/vim/issues/9698#issuecomment-1030662727
+        call getbufline(l:backing_buf, 1, "$")->writefile(l:backing_buf)
+        call setbufvar(l:backing_buf, "&modified", v:false)
     endif
-
-    call search('^'.l:backing_line,'cw')
 endfunction
 
-nnoremap <unique> <Plug>(code-todo-viewopen) <Cmd>call OpenTodoView()<CR>
-if get(g:, 'codetodo_mapenable', 1)
-    nmap <silent> <space>v <Plug>(code-todo-viewopen)
-endif
 
 " I am sure we can make things better...
 function s:CheckValidity() abort
@@ -82,10 +60,12 @@ function s:CheckValidity() abort
 endfunction
 
 
-function s:BufferRefreshTodos() abort
+function s:ViewRefreshFromBackingFile() abort
     if !s:CheckValidity()
         return
     endif
+
+    call s:EnsureBackingFilePersist()
 
     let l:window_collection = win_findbuf(bufnr())
     let l:winviews = {}
@@ -202,3 +182,46 @@ function s:OpenBackingFile()
     exe l:curr
 endfunction
 
+
+function OpenTodoView() abort
+    let l:backing_file = resolve(expand('%:p'))
+
+    if l:backing_file ==# ''
+        echoerr "No file found"
+        return
+    endif
+    "TODO: Check buftype
+    "TODO: Check readonly
+
+    " TODO: Check if current file is a todo file
+    " TODO: Todofiletype
+    " TODO: Extract this to a function
+ 
+    let l:todobuff = 'todo://'.l:backing_file
+    let l:backing_line = getpos('.')[1]
+
+    exe 'edit '.l:todobuff
+
+    if !exists('b:backing_todo_file')
+        let b:backing_todo_file = l:backing_file
+
+        "TODO nofile vs nowrite
+        "We wanted to list the buffer, so no nobuflisted
+        setl buftype=nofile 
+        setl bufhidden=hide 
+        setl noswapfile
+        setl noma
+        setl syntax=todoview
+
+        call s:CreateViewMaps()
+        call s:CreateViewAutocmds()
+        call s:ViewRefreshFromBackingFile()
+    endif
+
+    call search('^'.l:backing_line,'cw')
+endfunction
+
+nnoremap <unique> <Plug>(code-todo-viewopen) <Cmd>call OpenTodoView()<CR>
+if get(g:, 'codetodo_mapenable', 1)
+    nmap <silent> <space>v <Plug>(code-todo-viewopen)
+endif
