@@ -10,18 +10,20 @@ let s:todo_binary = s:script_dir.'/../code-todo.py'
 
 
 function s:CreateViewMaps() abort
-    nnoremap <buffer> dd  <Cmd>call <SID>MarkComplete()<CR>
-    nnoremap <buffer> u  <Cmd>call <SID>UndoChange()<CR>
+    noremap <buffer><silent> dd  <Cmd>call <SID>MarkComplete()<CR>
+    noremap <buffer><silent> u  <Cmd>call <SID>UndoChange()<CR>
 
-    nnoremap <buffer> <  <Cmd>call <SID>MakeShallower()<CR>
-    nnoremap <buffer> >  <Cmd>call <SID>MakeDeeper()<CR>
+    "Works for both normal and visual mode
+    noremap <buffer><silent> <  <Cmd>call <SID>MakeShallower()<CR>
+    noremap <buffer><silent> >  <Cmd>call <SID>MakeDeeper()<CR>
 
     "Use user's same mapping to switch back to BackingFile
-    nnoremap <buffer> <Plug>(code-todo-viewopen) :call <SID>OpenBackingFile()<CR>
+    noremap <buffer><silent> <Plug>(code-todo-viewopen) :call <SID>OpenBackingFile()<CR>
     
     "TODO: Make this much better
-    nnoremap <buffer> o  V:<BS><BS><BS><BS><BS>call <SID>AddTask('')<Left><Left>
-    nnoremap <buffer> cc :call <SID>EditTask('')<Left><Left>
+    "no silent because we want thigs echoed
+    noremap <buffer> o  V:<C-u>call <SID>AddTask('')<Left><Left>
+    noremap <buffer> cc V:<C-u>call <SID>EditTask('')<Left><Left>
 endfunction
 
 function s:CreateViewAutocmds() abort
