@@ -124,7 +124,9 @@ endfunction
 function s:EditTask(taskstring) abort
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
-                \ 'normal! 0wD"="'.taskstring.'"<CR>p'
+                \ 'let l:message = l:hyphens."'.a:taskstring.'"',
+                \ 'normal! dd',
+                \ 'put! =l:message'
                 \)
 endfunction
 
