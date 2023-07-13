@@ -216,7 +216,7 @@ function s:ExtractTaskNumber(...) abort
         exe a:1
     endif
 
-    normal 0
+    normal! 0
     let l:taskno = expand('<cword>')
     call winrestview(l:curview)
     return l:taskno
