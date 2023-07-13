@@ -199,18 +199,31 @@ function s:MoveRange(is_up) range abort
 
 endfunction
 
-function s:ExtractTaskDepthBacking() abort
-    let l:line = getline(".")
+" It takes an optional arguement which in line number. 
+" Otherwise, it is the current line
+function s:ExtractTaskDepthBacking(...) abort
+    if a:0 > 0
+        let l:line = getline(a:0)
+    else
+        let l:line = getline(".")
+    endif
+
     return len(matchstr(l:line,"^\-*"))
 endfunction
 
-function s:ExtractTaskString() abort
+" It takes an optional arguement which in line number. 
+" Otherwise, it is the current line
+function s:ExtractTaskString(...) abort
     if !s:CheckIfViewBuffer()
        return
     endif
     let l:curview = winsaveview()
     let l:old_reg = getreg("0")
     let l:old_reg_type = getregtype("0")
+
+    if a:0 > 0
+        exe a:1
+    endif
 
     normal! 0ww"0y$
     let l:task = getreg("0")
