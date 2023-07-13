@@ -17,6 +17,9 @@ function s:CreateViewMaps() abort
     noremap <buffer><silent> <  <Cmd>call <SID>MakeShallower()<CR>
     noremap <buffer><silent> >  <Cmd>call <SID>MakeDeeper()<CR>
 
+    noremap <buffer><silent> J  :call <SID>MoveRange(v:false)<CR>
+    noremap <buffer><silent> K  :call <SID>MoveRange(v:true)<CR>
+
     "Use user's same mapping to switch back to BackingFile
     noremap <buffer><silent> <Plug>(code-todo-viewopen) :call <SID>OpenBackingFile()<CR>
     
@@ -161,16 +164,58 @@ function s:MakeShallower() abort
                 \)
 endfunction
 
+
+
+" This function moves the range, and also visually selects it.
+function s:MoveRange(is_up) range abort
+    let l:tor = a:firstline   
+    let l:bor = a:lastline
+
+
+    let l:ttask = s:ExtractTaskNumber(l:tor)
+    let l:btask = s:ExtractTaskNumber(l:bor)
+
+    if a:is_up
+        let l:destination = s:ExtractTaskNumber(l:tor-1)-1
+    else
+        let l:destination = s:ExtractTaskNumber(l:bor+1)
+    endif
+
+    call s:BackingFileCommand(
+                \'silent '.l:ttask.','.l:btask.'move '.l:destination)
+
+    if a:is_up
+        exe l:tor-1
+    else
+        exe l:tor+1
+    endif
+
+    " Here, we select the text again..
+    let l:viewdiff = l:bor - l:tor
+    normal! V
+    if l:viewdiff>0
+        exe 'normal! '.l:viewdiff.'j'
+    endif
+
+endfunction
+
 function s:ExtractTaskDepthBacking() abort
     let l:line = getline(".")
     return len(matchstr(l:line,"^\-*"))
 endfunction
 
-function s:ExtractTaskNumber() abort
-    if !s:CheckValidity()
+" It takes an optional arguement which in line number. 
+" Otherwise, it is the current line
+function s:ExtractTaskNumber(...) abort
+    if !s:CheckIfViewBuffer()
        return
     endif
     let l:curview = winsaveview()
+
+    if a:0 > 0
+        exe a:1
+    endif
+
     normal 0
     let l:taskno = expand('<cword>')
     call winrestview(l:curview)
