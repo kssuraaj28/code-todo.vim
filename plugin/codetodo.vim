@@ -23,10 +23,9 @@ function s:CreateViewMaps() abort
     "Use user's same mapping to switch back to BackingFile
     noremap <buffer><silent> <Plug>(code-todo-viewopen) :call <SID>OpenBackingFile()<CR>
     
-    "TODO: Make this much better
     "no silent because we want thigs echoed
     noremap <buffer> o  V:<C-u>call <SID>AddTask('')<Left><Left>
-    noremap <buffer> cc V:<C-u>call <SID>EditTask('')<Left><Left>
+    noremap <buffer> cc V:<C-u>call <SID>EditTask('<C-R>=<SID>ExtractTaskString()<CR>')<Left><Left>
 endfunction
 
 function s:CreateViewAutocmds() abort
@@ -202,6 +201,22 @@ endfunction
 function s:ExtractTaskDepthBacking() abort
     let l:line = getline(".")
     return len(matchstr(l:line,"^\-*"))
+endfunction
+
+function s:ExtractTaskString() abort
+    if !s:CheckIfViewBuffer()
+       return
+    endif
+    let l:curview = winsaveview()
+    let l:old_reg = getreg("0")
+    let l:old_reg_type = getregtype("0")
+
+    normal! 0ww"0y$
+    let l:task = getreg("0")
+
+    call setreg("0", l:old_reg, l:old_reg_type) 
+    call winrestview(l:curview)
+    return l:task
 endfunction
 
 " It takes an optional arguement which in line number. 
