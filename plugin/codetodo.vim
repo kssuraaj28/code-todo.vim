@@ -35,7 +35,6 @@ function s:CreateViewAutocmds() abort
     augroup END
 endfunction
 
-"TODO: Make sure that you write 
 function s:EnsureBackingFilePersist() abort
     if !s:CheckIfViewBuffer()
         return
@@ -156,11 +155,13 @@ function s:MakeDeeper() abort
 endfunction
 
 
-"TODO: Can we add some if condition here
 function s:MakeShallower() abort
     call s:BackingFileCommand(
-                \ 'silent s/^-//'
-                \)
+         \'if s:ExtractTaskDepthBacking() > 0 |'.
+         \ 'silent s/^-// |'.
+         \' else |'.
+         \ 'echoerr "Top level task!" |'.
+         \'endif')
 endfunction
 
 
