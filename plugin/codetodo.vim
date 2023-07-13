@@ -33,7 +33,7 @@ endfunction
 
 "TODO: Make sure that you write 
 function s:EnsureBackingFilePersist() abort
-    if !s:CheckValidity()
+    if !s:CheckIfViewBuffer()
         return
     endif
 
@@ -51,7 +51,7 @@ endfunction
 
 
 " I am sure we can make things better...
-function s:CheckValidity() abort
+function s:CheckIfViewBuffer() abort
     if !exists('b:backing_todo_file')
       echoerr 'You shall not call!'
       return 0
@@ -61,7 +61,7 @@ endfunction
 
 
 function s:ViewRefreshFromBackingFile() abort
-    if !s:CheckValidity()
+    if !s:CheckIfViewBuffer()
         return
     endif
 
@@ -98,7 +98,7 @@ function s:ViewRefreshFromBackingFile() abort
 endfunction
 
 function s:BackingFileCommand(...) abort
-    if !s:CheckValidity()
+    if !s:CheckIfViewBuffer()
        return
     endif
     let l:task_no = s:ExtractTaskNumber()
@@ -176,7 +176,7 @@ function s:ExtractTaskNumber() abort
 endfunction
 
 function s:OpenBackingFile() abort
-    if !s:CheckValidity()
+    if !s:CheckIfViewBuffer()
        return
     endif
     let l:curr = s:ExtractTaskNumber()
