@@ -39,6 +39,7 @@ In the **todo view**, the following mappings are defined:
 
  * 'dd': Mark a task as completed
  * 'u': Undo previous change
+ * 'ctrl-r': Redo previous change
  * '>': Increase depth of a task
  * '<': Decrease depth of a task
  * 'o': Add a new task (write your task description, and press `<Enter>`)

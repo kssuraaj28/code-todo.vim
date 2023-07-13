@@ -12,6 +12,7 @@ let s:todo_binary = s:script_dir.'/../code-todo.py'
 function s:CreateViewMaps() abort
     noremap <buffer><silent> dd  <Cmd>call <SID>MarkComplete()<CR>
     noremap <buffer><silent> u  <Cmd>call <SID>UndoChange()<CR>
+    noremap <buffer><silent> <C-r>  <Cmd>call <SID>RedoChange()<CR>
 
     "Works for both normal and visual mode
     noremap <buffer><silent> <  <Cmd>call <SID>MakeShallower()<CR>
@@ -25,7 +26,7 @@ function s:CreateViewMaps() abort
     
     "no silent because we want thigs echoed
     noremap <buffer> o  V:<C-u>call <SID>AddTask('')<Left><Left>
-    noremap <buffer> cc V:<C-u>call <SID>EditTask('<C-R>=<SID>ExtractTaskString()<CR>')<Left><Left>
+    noremap <buffer> cc V:<C-u>call <SID>EditTask('<C-r>=<SID>ExtractTaskString()<CR>')<Left><Left>
 endfunction
 
 function s:CreateViewAutocmds() abort
@@ -121,6 +122,10 @@ endfunction
 
 function s:UndoChange() abort
     call s:BackingFileCommand('undo')
+endfunction
+
+function s:RedoChange() abort
+    call s:BackingFileCommand('redo')
 endfunction
 
 
