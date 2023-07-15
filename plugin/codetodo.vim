@@ -230,7 +230,8 @@ function s:ExtractTaskString(...) abort
         exe a:1
     endif
 
-    normal! 0ww"0y$
+    "This is super hacky, and should probably be changed
+    normal! 0wll"0y$
     let l:task = getreg("0")
 
     call setreg("0", l:old_reg, l:old_reg_type) 
