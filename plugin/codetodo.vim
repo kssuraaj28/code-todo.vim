@@ -133,8 +133,8 @@ function s:EditTask(taskstring) abort
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
                 \ 'let l:message = l:hyphens."'.a:taskstring.'"',
-                \ 'normal! dd',
-                \ 'put! =l:message'
+                \ 'put =l:message',
+                \ 'normal! kdd',
                 \)
 endfunction
 
