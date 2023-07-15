@@ -130,9 +130,10 @@ endfunction
 
 
 function s:EditTask(taskstring) abort
+    let l:trimmed = trim(a:taskstring)
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
-                \ 'let l:message = l:hyphens."'.a:taskstring.'"',
+                \ 'let l:message = l:hyphens."'.l:trimmed.'"',
                 \ 'put =l:message',
                 \ 'normal! kdd',
                 \)
@@ -145,9 +146,10 @@ function s:MarkComplete() abort
 endfunction
 
 function s:AddTask(taskstring) abort
+    let l:trimmed = trim(a:taskstring)
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
-                \ 'let l:taskadded = l:hyphens."'.a:taskstring.'"',
+                \ 'let l:taskadded = l:hyphens."'.l:trimmed.'"',
                 \ 'put =l:taskadded'
                 \)
     normal! j
@@ -222,20 +224,16 @@ function s:ExtractTaskString(...) abort
     if !s:CheckIfViewBuffer()
        return
     endif
-    let l:curview = winsaveview()
-    let l:old_reg = getreg("0")
-    let l:old_reg_type = getregtype("0")
-
     if a:0 > 0
-        exe a:1
+        let l:line = getline(a:0)
+    else
+        let l:line = getline(".")
     endif
+    
 
-    "This is super hacky, and should probably be changed
-    normal! 0wll"0y$
-    let l:task = getreg("0")
+    let l:endidx = matchstrpos(l:line,"^.*[*] ")[2]
+    let l:task = l:line[l:endidx:]
 
-    call setreg("0", l:old_reg, l:old_reg_type) 
-    call winrestview(l:curview)
     return l:task
 endfunction
 
