@@ -8,7 +8,6 @@ let s:script_path = resolve(expand('<sfile>:p'))
 let s:script_dir = fnamemodify(s:script_path, ':h')
 let s:todo_binary = s:script_dir.'/../code-todo.py'
 
-
 function s:CreateViewMaps() abort
     noremap <buffer><silent> dd  <Cmd>call <SID>MarkComplete()<CR>
     noremap <buffer><silent> u  <Cmd>call <SID>UndoChange()<CR>
@@ -24,9 +23,19 @@ function s:CreateViewMaps() abort
     "Use user's same mapping to switch back to BackingFile
     noremap <buffer><silent> <Plug>(code-todo-viewopen) :call <SID>OpenBackingFile()<CR>
     
-    "no silent because we want thigs echoed
-    noremap <buffer> o  V:<C-u>call <SID>AddTask('')<Left><Left>
-    noremap <buffer> cc V:<C-u>call <SID>EditTask('<C-r>=<SID>ExtractTaskString()<CR>')<Left><Left>
+    noremap <buffer><silent> o
+                \ V<Cmd>call <SID>AddTask(
+                \ input({'prompt':'Enter new task: ','cancelreturn': '~'})
+                \ )<CR>
+
+     " No silent here because the ExtractTaskString() default string will not
+     " appear
+    noremap <buffer> cc
+                \ V<Cmd>call <SID>EditTask(
+                \ input({'prompt':'Enter new task: ','cancelreturn': '~'})
+                \ )<CR>
+                \<C-r>=<SID>ExtractTaskString()<CR>
+    
 endfunction
 
 function s:CreateViewAutocmds() abort
@@ -129,8 +138,11 @@ function s:RedoChange() abort
 endfunction
 
 
-function s:EditTask(taskstring) abort
+function s:EditTask(taskstring) abort range
     let l:trimmed = trim(a:taskstring)
+    if l:trimmed ==# '~'
+        return
+    endif
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
                 \ 'let l:message = l:hyphens."'.l:trimmed.'"',
@@ -145,8 +157,12 @@ function s:MarkComplete() abort
                 \)
 endfunction
 
+
 function s:AddTask(taskstring) abort
     let l:trimmed = trim(a:taskstring)
+    if l:trimmed ==# '~'
+        return
+    endif
     call s:BackingFileCommand(
                 \ 'let l:hyphens = repeat("-",s:ExtractTaskDepthBacking())',
                 \ 'let l:taskadded = l:hyphens."'.l:trimmed.'"',
