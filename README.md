@@ -43,7 +43,7 @@ In the **todo view**, the following mappings are defined:
  * '>': Increase depth of a task
  * '<': Decrease depth of a task
  * 'o': Add a new task (write your task description, and press `<Enter>`)
- * 'cc': Change existing task description (write your task description, and press `<Enter>`)
+ * 'A': Change existing task description (write your task description, and press `<Enter>`)
  * 'J/K': Move current task down/up
 
 Moreover, you can use the same map that you use to open the **todo view** (`<space> v` by default) to switch back to the backing file.

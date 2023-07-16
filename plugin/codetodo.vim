@@ -30,7 +30,7 @@ function s:CreateViewMaps() abort
 
      " No silent here because the ExtractTaskString() default string will not
      " appear
-    noremap <buffer> cc
+    noremap <buffer> A
                 \ V<Cmd>call <SID>EditTask(
                 \ input({'prompt':'Enter new task: ','cancelreturn': '~'})
                 \ )<CR>
