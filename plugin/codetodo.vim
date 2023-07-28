@@ -3,6 +3,7 @@ if exists('g:loaded_codetodo_vim')
 endif
 let g:loaded_codetodo_vim = 1
 
+let s:spaceunit = '	'
 
 let s:script_path = resolve(expand('<sfile>:p'))
 let s:script_dir = fnamemodify(s:script_path, ':h')
@@ -25,17 +26,25 @@ function s:CreateViewMaps() abort
     
     noremap <buffer><silent> o
                 \ V<Cmd>call <SID>AddTask(
-                \ input({'prompt':'Enter new task: ','cancelreturn': '~'})
+                \ input(<SID>GenerateTaskCreationPrompt(<SID>ExtractTaskNumber()+1))
+                \ )<CR>
+    
+    noremap <buffer><silent> cc
+                \ V<Cmd>call <SID>EditTask(
+                \ input(<SID>GenerateTaskCreationPrompt(<SID>ExtractTaskNumber()))
                 \ )<CR>
 
      " No silent here because the ExtractTaskString() default string will not
      " appear
     noremap <buffer> A
                 \ V<Cmd>call <SID>EditTask(
-                \ input({'prompt':'Enter new task: ','cancelreturn': '~'})
-                \ )<CR>
-                \<C-r>=<SID>ExtractTaskString()<CR>
+                \ input(<SID>GenerateTaskCreationPrompt(<SID>ExtractTaskNumber()))
+                \ )<CR><C-r>=<SID>ExtractTaskString()<CR>
     
+endfunction
+
+function s:GenerateTaskCreationPrompt(linenr) abort
+    return  {'prompt':'Enter new task['.a:linenr.']: ','cancelreturn': '~'}
 endfunction
 
 function s:CreateViewAutocmds() abort
@@ -95,10 +104,10 @@ function s:ViewRefreshFromBackingFile() abort
     $delete
 
     " Make subtasks cleaner
-    silent %s/^-*/\=repeat('    ',strlen(submatch(0))).'* '
+    silent %s/^-*/\=repeat(s:spaceunit,strlen(submatch(0))).'* '
 
     " Add line numbers to the file
-    silent %s/^/\=line('.')."\t"/
+    silent %s/^/\=line('.').s:spaceunit/
 
     " Filter out completed tasks
     silent global/^.*\~$/d
