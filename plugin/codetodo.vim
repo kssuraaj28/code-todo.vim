@@ -49,7 +49,7 @@ endfunction
 
 function s:CreateViewAutocmds() abort
     augroup codetodo
-        autocmd!
+        autocmd! BufEnter <buffer>
         autocmd BufEnter <buffer> call <SID>ViewRefreshFromBackingFile()
     augroup END
 endfunction
@@ -243,11 +243,6 @@ function s:ExtractTaskDepthBacking(...) abort
     return len(matchstr(l:line,"^\-*"))
 endfunction
 
-"TODO: Lambda this
-function s:SpaceCount(line) 
-    let l:numstrip = substitute(a:line,"^[0-9]*",'','')
-    return len(matchstr(l:numstrip,"^.*[*]"))-1
-endfunction
 " It takes an optional arguement which in line number. 
 " Otherwise, it is the current line
 function s:ExtractTaskString(...) abort
