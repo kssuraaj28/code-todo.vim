@@ -123,11 +123,10 @@ function s:BackingFileCommand(...) abort
     if !s:CheckIfViewBuffer()
        return
     endif
-    let l:task_no = s:ExtractTaskNumber()
     let l:curview = winsaveview()
     let l:me = bufname()
-    exe 'edit '.b:backing_todo_file
-    exe l:task_no
+    
+    call s:OpenBackingFile()
 
     for cmd_string in a:000
         exe cmd_string
@@ -160,7 +159,8 @@ function s:EditTask(taskstring) abort range
                 \)
 endfunction
 
-function s:MarkComplete() abort
+"TODO: Range
+function s:MarkComplete() abort 
     call s:BackingFileCommand(
                 \ 'normal! A ~'
                 \)
