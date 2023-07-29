@@ -25,19 +25,19 @@ function s:CreateViewMaps() abort
     noremap <buffer><silent> <Plug>(code-todo-viewopen) :call <SID>OpenBackingFile()<CR>
     
     noremap <buffer><silent> o
-                \ V<Cmd>call <SID>AddTask(
+                \ <Cmd>call <SID>AddTask(
                 \ input(<SID>GenerateTaskCreationPrompt(<SID>ExtractTaskNumber()+1))
                 \ )<CR>
     
     noremap <buffer><silent> cc
-                \ V<Cmd>call <SID>EditTask(
+                \ <Cmd>call <SID>EditTask(
                 \ input(<SID>GenerateTaskCreationPrompt(<SID>ExtractTaskNumber()))
                 \ )<CR>
 
      " No silent here because the ExtractTaskString() default string will not
      " appear
     noremap <buffer> A
-                \ V<Cmd>call <SID>EditTask(
+                \ <Cmd>call <SID>EditTask(
                 \ input(<SID>GenerateTaskCreationPrompt(<SID>ExtractTaskNumber()))
                 \ )<CR><C-r>=<SID>ExtractTaskString()<CR>
     
