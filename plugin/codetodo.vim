@@ -321,6 +321,7 @@ function OpenTodoView() abort
     " TODO: Extract this to a function
     let l:todobuff = 'todo://'.l:backing_file
     let l:backing_line = getpos('.')[1]
+"    let l:backing_line = line('.')
 
     exe 'silent edit '.l:todobuff
 
@@ -333,6 +334,7 @@ function OpenTodoView() abort
         setl bufhidden=hide 
         setl noswapfile
         setl noma
+        setl cursorline
         setl syntax=todoview
 
         call s:CreateViewMaps()
@@ -340,7 +342,7 @@ function OpenTodoView() abort
         call s:ViewRefreshFromBackingFile()
     endif
 
-    call search('^'.l:backing_line,'cw')
+    call search('^'.l:backing_line.s:spaceunit,'cw')
 endfunction
 
 nnoremap <unique> <Plug>(code-todo-viewopen) <Cmd>call OpenTodoView()<CR>
